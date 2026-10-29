@@ -11,7 +11,7 @@ import {
   runSimulation, compareArchitectures,
   DEFAULT_CONFIG, COMPARISON_CONFIG
 } from '../simulation/engine';
-import { SEED_WORKLOAD } from '../simulation/workloads';
+import { SEED_WORKLOAD, PRESET_WORKLOADS } from '../simulation/workloads';
 
 // -------------------------------------------------------
 // App State
@@ -32,7 +32,7 @@ const initialState: AppState = {
   simulation: null,
   savedProfiles: [],
   experiments: PRESET_EXPERIMENTS(),
-  savedWorkloads: [SEED_WORKLOAD],
+  savedWorkloads: PRESET_WORKLOADS,
   currentConfig: DEFAULT_CONFIG,
   comparisonConfigB: COMPARISON_CONFIG,
   activeWorkload: SEED_WORKLOAD,

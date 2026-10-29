@@ -135,5 +135,55 @@ export const SEED_WORKLOAD: Workload = {
   id: 'wl-seed',
   name: 'Mumbai Metro Deliveries',
   orders: SEED_ORDERS,
-  createdAt: Date.now(),
+  createdAt: 1700000000000,
 };
+
+export const EXPRESS_WORKLOAD: Workload = {
+  id: 'wl-express',
+  name: 'Express Flash Rush (High Priority)',
+  orders: [
+    {
+      id: 'AF-2001', customer: 'Rohan Gupta', pickup: 'Bandra Kurla Complex', destination: 'Nariman Point',
+      weight: 0.8, quantity: 2, price: 1500, distance: 14.2, priority: 'Urgent', deliveryType: 'Same-Day', status: 'Pending',
+    },
+    {
+      id: 'AF-2002', customer: 'Ananya Roy', pickup: 'Lower Parel', destination: 'Powai',
+      weight: 1.5, quantity: 4, price: 2200, distance: 19.8, priority: 'Urgent', deliveryType: 'Express', status: 'Pending',
+    },
+    {
+      id: 'AF-2003', customer: 'Vikram Mehta', pickup: 'Andheri East', destination: 'Vashi',
+      weight: 3.2, quantity: 6, price: 950, distance: 26.0, priority: 'High', deliveryType: 'Express', status: 'Pending',
+    },
+  ],
+  createdAt: 1700000001000,
+};
+
+export const BULK_CARGO_WORKLOAD: Workload = {
+  id: 'wl-bulk',
+  name: 'Intercity Bulk Cargo Logistics',
+  orders: [
+    {
+      id: 'AF-3001', customer: 'Apex Retailers', pickup: 'Bhiwandi Hub', destination: 'Pune DC',
+      weight: 18.5, quantity: 45, price: 180, distance: 145.0, priority: 'Normal', deliveryType: 'Standard', status: 'Pending',
+    },
+    {
+      id: 'AF-3002', customer: 'FreshMart Supplies', pickup: 'Vashi APMC', destination: 'Nashik Central',
+      weight: 22.0, quantity: 60, price: 140, distance: 165.5, priority: 'High', deliveryType: 'Express', status: 'Pending',
+    },
+    {
+      id: 'AF-3003', customer: 'TechnoParts Ltd', pickup: 'Taloja MIDC', destination: 'Chakan Industrial',
+      weight: 12.0, quantity: 18, price: 650, distance: 120.0, priority: 'Urgent', deliveryType: 'Same-Day', status: 'Pending',
+    },
+    {
+      id: 'AF-3004', customer: 'Zenith Logistics', pickup: 'JNPT Port', destination: 'Panvel Hub',
+      weight: 35.0, quantity: 80, price: 95, distance: 28.5, priority: 'Normal', deliveryType: 'Standard', status: 'Pending',
+    },
+  ],
+  createdAt: 1700000002000,
+};
+
+export const PRESET_WORKLOADS: Workload[] = [
+  SEED_WORKLOAD,
+  EXPRESS_WORKLOAD,
+  BULK_CARGO_WORKLOAD,
+];

@@ -171,6 +171,9 @@ export function runSimulation(config: SimulationConfig, workload: Workload): Sim
       let event: EventComponent = 'FETCH';
       let eventDesc = `FETCH ${instr.opcode}`;
       let result = '';
+      let changedReg: number | null = null;
+      let aluInfo: { op: string; a: number; b: number; result: number; flags?: import('../types').StatusRegister } | null = null;
+      let memInfo: { addr: number; isWrite: boolean; data?: number; hit: 'HIT' | 'MISS' } | null = null;
 
       // Update registers
       core.registers.PC = instr.address;
@@ -196,6 +199,7 @@ export function runSimulation(config: SimulationConfig, workload: Workload): Sim
           const addr = instr.memAddress ?? (0x1000 + coreId * 0x40);
           const accessResult = hierarchyAccess(l1Cache, l2Cache, memory, addr, false, 0, cycle, coreId, config.coherenceProtocol);
           metrics.memoryAccesses++;
+          memInfo = { addr, isWrite: false, data: accessResult.data, hit: accessResult.l1Result };
           if (accessResult.l1Result === 'HIT') {
             metrics.l1Hits++;
             event = 'CACHE'; eventDesc = 'LOAD L1 HIT'; result = `data=0x${(accessResult.data ?? 0).toString(16)}`;
@@ -237,6 +241,7 @@ export function runSimulation(config: SimulationConfig, workload: Workload): Sim
             const regIdx = parseInt(instr.operand1.replace('R', ''), 10);
             if (regIdx >= 0 && regIdx < 8) {
               core.registers.GP[regIdx] = accessResult.data ?? 0;
+              changedReg = regIdx;
             }
           }
           break;
@@ -249,6 +254,7 @@ export function runSimulation(config: SimulationConfig, workload: Workload): Sim
 
           const accessResult = hierarchyAccess(l1Cache, l2Cache, memory, addr, true, storeData, cycle, coreId, config.coherenceProtocol);
           metrics.memoryAccesses++;
+          memInfo = { addr, isWrite: true, data: storeData, hit: accessResult.l1Result };
 
           if (accessResult.l1Result === 'HIT') metrics.l1Hits++;
           else { metrics.l1Misses++; instrCycles += 4; }
@@ -270,6 +276,8 @@ export function runSimulation(config: SimulationConfig, workload: Workload): Sim
             const rd = parseInt((instr.operand1 ?? 'R0').replace('R', ''), 10);
             core.registers.GP[rd] = aluResult.result;
             core.registers.SR = aluResult.flags;
+            changedReg = rd;
+            aluInfo = { op: instr.opcode, a, b, result: aluResult.result, flags: aluResult.flags };
             metrics.aluOperations++;
             instrCycles = aluResult.cycles;
             event = 'ALU'; eventDesc = `${instr.opcode} ${a} ${instr.operand3 ? ',' + b : ''}`;
@@ -283,6 +291,7 @@ export function runSimulation(config: SimulationConfig, workload: Workload): Sim
         case 'MOV': {
           const rd = parseInt((instr.operand1 ?? 'R0').replace('R', ''), 10);
           core.registers.GP[rd] = instr.immediate ?? 0;
+          changedReg = rd;
           event = 'FETCH'; eventDesc = 'MOV'; result = `${instr.operand1} ← ${instr.immediate}`;
           break;
         }
@@ -322,6 +331,19 @@ export function runSimulation(config: SimulationConfig, workload: Workload): Sim
           microOps: microOps.slice(0, 3),
           ctrlSignals: ctrlSig,
           address: instr.memAddress,
+          changedReg,
+          aluInfo,
+          memInfo,
+          registers: {
+            PC: core.registers.PC,
+            IR: core.registers.IR,
+            MAR: core.registers.MAR,
+            MDR: core.registers.MDR,
+            ACC: core.registers.ACC,
+            SP: core.registers.SP,
+            SR: { ...core.registers.SR },
+            GP: [...core.registers.GP],
+          },
         },
       });
 
